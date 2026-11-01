@@ -40,8 +40,15 @@ function banner(msg, kind = "") {
 }
 
 /* ---------------------------------------------------------------- sign in */
+function statusLine(st) {
+  if (!st) return "";
+  const p = st.present, miss = Object.keys(p).filter((k) => !p[k]);
+  return `Version ${st.version} (${st.env}). ` + (miss.length ? `Missing settings: ${miss.join(", ")}.` : "All settings found.")
+    + (miss.length && st.similar_names.length ? ` Found instead: ${st.similar_names.join(", ")}.` : "");
+}
 function showLogin() {
   $("#app").hidden = true; $("#login").hidden = false;
+  $("#login-status").textContent = statusLine(S.me && S.me.status);
   $("#pw-wrap").hidden = S.me && S.me.password_required === false;
   $("#login-name").value = decodeURIComponent((document.cookie.match(/dh_name=([^;]+)/) || [])[1] || "");
 }
@@ -66,8 +73,8 @@ async function start() {
   const pill = $("#mode-pill");
   pill.className = "pill " + (S.me.live ? "live" : "demo");
   pill.textContent = S.me.live ? "Live PropertyData" : "Demo data";
-  if (!S.me.persistent) banner("No database connected: listings and the deal log won't be kept. Add DATABASE_URL (see README).", "");
-  else if (!S.me.live) banner("Demo mode: invented listings. Add PROPERTYDATA_API_KEY to go live.", "");
+  const sl = statusLine(S.me.status);
+  if (!S.me.live || !S.me.persistent) banner((S.me.live ? "" : "Demo mode: invented listings. ") + sl, "");
   const st = await api("/api/settings");
   S.allLists = st.all_lists; S.settings = st;
   renderSettings();

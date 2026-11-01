@@ -82,14 +82,28 @@ def logout(response: Response):
     return {"ok": True}
 
 
+def diagnostics() -> dict:
+    """Which settings this deployment can see (names only, never values)."""
+    names = ["PROPERTYDATA_API_KEY", "APP_PASSWORD", "APP_SECRET", "DATABASE_URL"]
+    near = sorted(k for k in os.environ if any(w in k.upper() for w in ("PROPERTY", "APP_", "DATABASE", "POSTGRES", "STORAGE")))
+    return {"present": {n: bool(os.environ.get(n)) for n in names}, "similar_names": near,
+            "version": (os.environ.get("VERCEL_GIT_COMMIT_SHA") or "local")[:7],
+            "env": os.environ.get("VERCEL_ENV", "local")}
+
+
+@app.get("/api/status")
+def status():
+    return diagnostics()
+
+
 @app.get("/api/me")
 def me(request: Request):
     try:
         name = user(request)
     except HTTPException:
-        return {"signed_in": False, "password_required": bool(PASSWORD)}
+        return {"signed_in": False, "password_required": bool(PASSWORD), "status": diagnostics()}
     return {"signed_in": True, "name": name, "password_required": bool(PASSWORD),
-            "live": bool(API_KEY), "persistent": store().persistent}
+            "live": bool(API_KEY), "persistent": store().persistent, "status": diagnostics()}
 
 
 # ------------------------------------------------------------------ settings
