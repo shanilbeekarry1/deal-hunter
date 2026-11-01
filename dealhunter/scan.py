@@ -47,8 +47,8 @@ def run_scan(client, store: Store, areas: list[dict], lists: list[str], bb: dict
                                                    bb["min_price"], bb["max_price"], bb["exclude_flats"]):
                     if l.get("price"):
                         found.append((area["name"], l))
-            except APIError as e:
-                errors.append(f"{area['name']}: {e}")
+            except (APIError, ValueError) as e:
+                errors.append(f"{area['name'] or area['postcode']}: {e}")
     except BudgetExceeded as e:
         stopped = str(e)
 

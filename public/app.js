@@ -85,10 +85,11 @@ async function start() {
 /* ---------------------------------------------------------------- settings */
 function renderSettings() {
   const s = S.settings;
-  $("#areas").innerHTML = s.areas.map((a, i) => `
+  $("#areas").innerHTML = (s.areas.length ? `<div class="area area-head"><span>Label</span><span>Postcode or town</span><span>Miles</span><span></span></div>` : "")
+    + s.areas.map((a, i) => `
     <div class="area" data-i="${i}">
-      <input aria-label="Area name" data-k="name" value="${esc(a.name)}" placeholder="Name">
-      <input aria-label="Postcode" data-k="postcode" value="${esc(a.postcode)}" placeholder="DN4 or DN4 0">
+      <input aria-label="Label" data-k="name" value="${esc(a.name)}" placeholder="East Leeds">
+      <input aria-label="Postcode or town" data-k="postcode" value="${esc(a.postcode)}" placeholder="LS9 or Leeds">
       <input aria-label="Radius in miles" data-k="radius" type="number" min="1" max="40" value="${esc(a.radius)}">
       <button type="button" aria-label="Remove area" data-rm="${i}">×</button>
     </div>`).join("") || `<p class="muted small">No areas yet.</p>`;
@@ -174,7 +175,9 @@ $("#btn-scan").addEventListener("click", async () => {
   try {
     const r = await api("/api/scan", { method: "POST" });
     const msg = `Scan done in ${r.seconds}s: ${r.found} listings found, ${r.listings} valued, ${r.credits} credits used.`
-      + (r.stopped ? " " + r.stopped : "") + (r.errors.length ? ` ${r.errors.length} errors (see Scan history).` : "");
+      + (r.stopped ? " " + r.stopped : "")
+      + (r.errors.length ? ` Problem: ${r.errors[0]}` + (r.errors.length > 1 ? ` (+${r.errors.length - 1} more in Scan history)` : "") : "")
+      + (!r.found && !r.errors.length ? " Nothing matched: try a wider radius, a higher max price or more sourcing lists." : "");
     banner(msg, r.stopped || r.errors.length ? "" : "ok");
     await loadDeals();
   } catch (e) { banner("Scan failed: " + e.message, "bad"); }
@@ -321,6 +324,7 @@ function renderSheet(d, el) {
     <div style="display:grid;gap:6px">
       <div class="conf"><h3 style="margin:0">Valuation confidence</h3><div class="meter"><i style="width:${e.conf_score}%"></i></div>
         <span class="num small">${esc(e.conf)} · ${e.conf_score}</span></div>
+      ${e.suspect ? `<p class="err small" style="margin:0"><b>Price looks wrong for a whole house here.</b> Read the listing before trusting these numbers.</p>` : ""}
       ${c.ok ? `<p class="muted small" style="margin:0">${c.n} sold ${c.same_type ? "same-type " : ""}comparables in the ${esc((l.postcode || "").slice(0, -2).trim())} sector.
         As-is uses the lower quartile <span class="num">£${Math.round(e.asis_psf)}</span>/sq ft, after-refurb the upper quartile
         <span class="num">£${Math.round(e.renov_psf)}</span>/sq ft (median £${Math.round(c.median)}).</p>` : ""}
@@ -360,7 +364,10 @@ function renderSheet(d, el) {
       </div>
     </form>`;
 }
-function titleCase(s) { return s.toLowerCase().replace(/\b([a-z])/g, (m) => m.toUpperCase()).replace(/\b(Dn|Wf|Ls|S)(\d)/g, (m, a, b2) => a.toUpperCase() + b2); }
+function titleCase(s) {
+  return s.toLowerCase().replace(/\b([a-z])/g, (m) => m.toUpperCase())
+    .replace(/\b([a-z]{1,2}\d[a-z\d]?)\s+(\d[a-z]{2})\b/gi, (m, a, b2) => (a + " " + b2).toUpperCase());
+}
 
 document.addEventListener("submit", async (e) => {
   const f = e.target.closest("form.logform"); if (!f) return;

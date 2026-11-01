@@ -55,6 +55,7 @@ label.check input{width:auto}
 .areas{display:grid;gap:6px}
 .area{display:grid;grid-template-columns:1.2fr 1fr 56px 28px;gap:6px;align-items:center}
 .area input{padding:5px 7px;font-size:14px}
+.area-head span{font-size:12px;font-weight:600;color:var(--muted)}
 .area button{border:0;background:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0}
 .lists{display:flex;flex-wrap:wrap;gap:6px}
 .lists button{font:13px var(--body);padding:3px 9px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}

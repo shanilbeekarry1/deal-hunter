@@ -21,6 +21,43 @@ from .db import Store
 BASE = "https://api.propertydata.co.uk"
 
 
+POSTCODE_FULL = re.compile(r"^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$")
+POSTCODE_SECTOR = re.compile(r"^[A-Z]{1,2}\d[A-Z\d]? \d$")
+POSTCODE_DISTRICT = re.compile(r"^[A-Z]{1,2}\d[A-Z\d]?$")
+POSTCODE_AREA = re.compile(r"^[A-Z]{1,2}$")
+
+
+def classify_area(text: str) -> tuple[str, str]:
+    """('postcode', 'LS9') for a district, sector or full postcode; ('town', 'Leeds') otherwise.
+    Raises ValueError with a helpful message for things PropertyData can't search."""
+    t = " ".join(str(text or "").upper().split())
+    if not t:
+        raise ValueError("Enter a postcode (LS9, LS9 0 or LS9 7AB) or a town name.")
+    if POSTCODE_FULL.match(t) or POSTCODE_SECTOR.match(t) or POSTCODE_DISTRICT.match(t):
+        return "postcode", t
+    if POSTCODE_AREA.match(t):
+        raise ValueError(f"'{t}' is a whole postcode area, which is too broad to search. "
+                         f"Use a district like {t}9, a sector like {t}9 0, or a town name.")
+    if len(t) < 3:
+        raise ValueError(f"'{text}' isn't a postcode or town PropertyData can search.")
+    return "town", str(text).strip()
+
+
+def geocode_town(name: str) -> str:
+    """Town or village name -> 'lat,lng' using postcodes.io (free, no key)."""
+    try:
+        r = requests.get("https://api.postcodes.io/places", params={"q": name, "limit": 5}, timeout=15)
+        results = (r.json() or {}).get("result") or []
+    except (requests.RequestException, ValueError):
+        raise ValueError(f"Couldn't look up '{name}'. Try a postcode district like LS9 instead.")
+    rank = {"City": 0, "Town": 1, "Suburban Area": 2, "Village": 3}
+    results.sort(key=lambda p: rank.get(p.get("local_type"), 9))
+    if not results:
+        raise ValueError(f"No UK place called '{name}'. Try a postcode district like LS9 instead.")
+    p = results[0]
+    return f"{p['latitude']},{p['longitude']}"
+
+
 class BudgetExceeded(Exception):
     pass
 
@@ -115,9 +152,18 @@ class PropertyData:
             return {"status": "error", "message": f"HTTP {r.status_code}, not JSON"}
 
     # ------------------------------------------------------------- listings
-    def sourced_properties(self, postcode: str, radius: int, lists: list[str], min_price: int,
+    def sourced_properties(self, area: str, radius: int, lists: list[str], min_price: int,
                            max_price: int, exclude_flats: bool, results: int = 100) -> list[dict]:
-        params = {"list": ",".join(lists[:5]), "postcode": postcode, "radius": radius,
+        kind, value = classify_area(area)
+        if kind == "town":
+            loc = self.store.cache_get("geocode?" + value.lower(), 365)
+            if loc is None:
+                loc = geocode_town(value)
+                self.store.cache_put("geocode?" + value.lower(), loc)
+            where = {"location": loc}
+        else:
+            where = {"postcode": value}
+        params = {"list": ",".join(lists[:5]), **where, "radius": radius,
                   "min_price": min_price, "max_price": max_price, "results": results, "exclude_sstc": 1}
         if exclude_flats:
             params["standardised_type"] = "!flat"
@@ -274,7 +320,9 @@ class DemoData:
         self.credits_used = 0
         self.raw_samples = {}
 
-    def sourced_properties(self, postcode, radius, lists, min_price, max_price, exclude_flats, results=100):
+    def sourced_properties(self, area, radius, lists, min_price, max_price, exclude_flats, results=100):
+        kind, value = classify_area(area)
+        postcode = value if kind == "postcode" else "DN4"
         rnd = random.Random(postcode)
         district = postcode.upper().split()[0]
         out = []

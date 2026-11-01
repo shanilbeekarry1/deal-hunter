@@ -42,6 +42,22 @@ def refurb_band(listing: dict) -> str:
     return "light"
 
 
+import re
+
+NOT_A_HOUSE = [  # (pattern in listing text, reason) -> valuation against sold houses is meaningless
+    (r"shared ownership|\b\d{1,2}% share\b", "Shared ownership: the price is for a share, not the whole house"),
+    (r"park home|mobile home|static caravan|lodge", "Park home or lodge: can't be valued against bricks-and-mortar sales"),
+    (r"retirement|over (55|60|65)s?\b|age restricted|sheltered", "Retirement / age-restricted: small resale market"),
+    (r"building plot|\bplot of land\b|\bland only\b|parcel of land", "Land or plot, not a house"),
+    (r"ground rent investment|freehold investment|ground rents", "Ground-rent investment, not a house"),
+]
+
+
+def not_a_house(listing: dict) -> list[str]:
+    text = (listing.get("summary") or "").lower() + " " + str(listing.get("address", "")).lower()
+    return [why for pat, why in NOT_A_HOUSE if re.search(pat, text)]
+
+
 def listing_flags(listing: dict) -> list[str]:
     """Watch-outs read from the listing itself."""
     text = (listing.get("summary") or "").lower()
@@ -53,7 +69,8 @@ def listing_flags(listing: dict) -> list[str]:
     if "modern method of auction" in text:
         out.append("Modern Method of Auction: expect a non-refundable reservation fee (often 4.5%+ of price) on top")
     elif "auction" in text or "auction-properties" in listing.get("lists", []):
-        out.append("Auction: completion usually due in 28 days. Funding must be in place before bidding")
+        out.append("Auction: the price shown is usually a guide; lots often sell above it. "
+                   "Completion is typically due within 28 days, so have funding in place before bidding")
     if "cash buyer" in text:
         out.append("Cash buyers only: often means it can't be mortgaged. Find out why")
     for w, msg in (("non-standard", "Non-standard construction mentioned: check mortgageability"),
@@ -125,7 +142,12 @@ def confidence(comps: dict, sqft_source: str, listing: dict, bmv: float) -> tupl
         score -= 20; why.append("Floor area estimated from bedrooms. Check the floor plan")
     if listing.get("years_remaining") and listing["years_remaining"] < 85:
         score -= 25; why.append(f"Short lease ({int(listing['years_remaining'])} years): hard to mortgage, comps don't reflect it")
-    if bmv > 0.35:
+    if not listing.get("bedrooms"):
+        score -= 10; why.append("Bedrooms not stated")
+    if bmv > 0.45:
+        score -= 45; why.append(f"{bmv:.0%} below local values is almost never a real discount. Usually an auction guide, "
+                                "shared ownership, a park home, a plot or a serious defect. Read the listing first")
+    elif bmv > 0.35:
         score -= 15; why.append(f"{bmv:.0%} below value is unusual. Assume a reason until the survey says otherwise")
     score = max(5, score)
     return score, ("High" if score >= 75 else "Medium" if score >= 50 else "Low"), why
@@ -173,6 +195,11 @@ def evaluate(listing: dict, comps: dict, sqft_found, bb: dict, overrides: dict |
     flags += listing_flags(listing)
     if v == "Go" and any(f.startswith("Tenants in situ") for f in flags):
         v = "Review"  # can't flip it until the tenants have left
+    nah = not_a_house(listing)
+    if nah:
+        flags = nah + flags
+        v = "Pass"  # the valuation doesn't apply
+    suspect = base["bmv"] > 0.45 or bool(nah)
     if outside_england(listing.get("postcode", "")):
         flags.append("Outside England: stamp duty here uses England rates, so the tax line is wrong")
 
@@ -181,4 +208,4 @@ def evaluate(listing: dict, comps: dict, sqft_found, bb: dict, overrides: dict |
     return {"ok": True, "max_offer": max_offer, "sqft": sqft, "sqft_source": sqft_source, "asis_psf": asis_psf, "renov_psf": renov_psf,
             "band": band, "base": base, "worst": worst, "best": best, "conf_score": score, "conf": label,
             "conf_why": why, "verdict": v, "flags": flags, "comps": comps,
-            "rank_score": base["margin"] * score / 100}
+            "rank_score": base["margin"] * score / 100 * (0.25 if suspect else 1), "suspect": suspect}
