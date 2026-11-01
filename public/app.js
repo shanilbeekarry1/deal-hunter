@@ -74,7 +74,11 @@ async function start() {
   pill.className = "pill " + (S.me.live ? "live" : "demo");
   pill.textContent = S.me.live ? "Live PropertyData" : "Demo data";
   const sl = statusLine(S.me.status);
-  if (!S.me.live || !S.me.persistent) banner((S.me.live ? "" : "Demo mode: invented listings. ") + sl, "");
+  const k = S.me.key;
+  if (k && k.status !== "success") {
+    banner(`PropertyData rejected the API key: ${k.code || ""} ${k.message || JSON.stringify(k)}. Check PROPERTYDATA_API_KEY in Vercel, then redeploy.`, "bad");
+  } else if (k) { pill.textContent = "Live PropertyData ✓"; }
+  if ((!S.me.live || !S.me.persistent) && !(k && k.status !== "success")) banner((S.me.live ? "" : "Demo mode: invented listings. ") + sl, "");
   const st = await api("/api/settings");
   S.allLists = st.all_lists; S.settings = st;
   renderSettings();
@@ -177,6 +181,7 @@ $("#btn-scan").addEventListener("click", async () => {
     const msg = `Scan done in ${r.seconds}s: ${r.found} listings found, ${r.listings} valued, ${r.credits} credits used.`
       + (r.stopped ? " " + r.stopped : "")
       + (r.errors.length ? ` Problem: ${r.errors[0]}` + (r.errors.length > 1 ? ` (+${r.errors.length - 1} more in Scan history)` : "") : "")
+      + (r.searched && r.searched.length ? ` Searched districts: ${r.searched.join(" · ")}.` : "")
       + (!r.found && !r.errors.length ? " Nothing matched: try a wider radius, a higher max price or more sourcing lists." : "");
     banner(msg, r.stopped || r.errors.length ? "" : "ok");
     await loadDeals();

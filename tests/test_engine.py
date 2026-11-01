@@ -69,3 +69,28 @@ def test_suspicious_price_and_not_a_house():
     l2 = dict(l, summary="A 25% share of this home under shared ownership")
     e2 = evaluate(l2, comps, None, BB)
     assert e2["verdict"] == "Pass" and e2["flags"][0].startswith("Shared ownership")
+
+def test_sweep_and_actual_credits(tmp_path, monkeypatch):
+    from dealhunter.db import Store
+    from dealhunter import propertydata as pd
+    calls = []
+    class R:
+        def __init__(s, body, code=200): s.body, s.status_code, s.headers = body, code, {}
+        def json(s): return s.body
+    def fake_get(url, params=None, timeout=None):
+        calls.append((url, dict(params or {})))
+        if url.endswith("/outcodes/LS9"): return R({"result": {"latitude": 53.80, "longitude": -1.50}})
+        if url.endswith("/outcodes"): return R({"result": [{"outcode": "LS9"}, {"outcode": "LS8"}, {"outcode": "LS15"}]})
+        if url.endswith("/sourced-properties"):
+            pc = params["postcode"]
+            return R({"status": "success", "api_calls_cost": 1, "properties": [
+                {"id": "R1", "address": "1 A St", "postcode": "LS9 6BG", "price": 100000},
+                {"id": pc, "address": "2 B St", "postcode": pc + " 1AA", "price": 90000}]})
+        return R({"status": "error"}, 404)
+    monkeypatch.setattr(pd.requests, "get", fake_get)
+    c = pd.PropertyData("k", Store(f"sqlite:///{tmp_path}/s.db"), 100)
+    assert c.search_points("LS9", 5) == ["LS9", "LS8", "LS15"]
+    out = c.sourced_properties("LS9", 5, ["reduced-properties"], 0, 500000, True)
+    assert sorted(l["id"] for l in out) == ["LS15", "LS8", "LS9", "R1"]   # deduped across districts
+    assert c.credits_used == 3                                              # actual cost, not reserved 5 each
+    assert all(p["radius"] == 1 for u, p in calls if u.endswith("sourced-properties"))

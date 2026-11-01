@@ -28,6 +28,20 @@ PASSWORD = os.environ.get("APP_PASSWORD", "")
 SECRET = (os.environ.get("APP_SECRET") or PASSWORD or "local-dev").encode()
 COOKIE = "dh_session"
 _store: Store | None = None
+_key_check: dict = {"at": 0, "result": None}
+
+
+def key_status() -> dict | None:
+    """Ask PropertyData whether the key works (cached 10 minutes)."""
+    if not API_KEY:
+        return None
+    if time.time() - _key_check["at"] > 600:
+        try:
+            r = PropertyData(API_KEY, store(), 0).check_key()
+        except Exception as ex:
+            r = {"status": "error", "message": str(ex)}
+        _key_check.update(at=time.time(), result=r)
+    return _key_check["result"]
 
 
 def store() -> Store:
@@ -103,7 +117,8 @@ def me(request: Request):
     except HTTPException:
         return {"signed_in": False, "password_required": bool(PASSWORD), "status": diagnostics()}
     return {"signed_in": True, "name": name, "password_required": bool(PASSWORD),
-            "live": bool(API_KEY), "persistent": store().persistent, "status": diagnostics()}
+            "live": bool(API_KEY), "persistent": store().persistent, "status": diagnostics(),
+            "key": key_status()}
 
 
 # ------------------------------------------------------------------ settings

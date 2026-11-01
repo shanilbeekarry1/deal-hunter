@@ -44,7 +44,7 @@ DEFAULT_BUY_BOX = {
 REFURB_RATES = {"light": 15, "medium": 28, "heavy": 45}
 
 # Credit guard: stop a scan before it spends more than this many API credits.
-DEFAULT_CREDIT_BUDGET = 50
+DEFAULT_CREDIT_BUDGET = 150
 
 # How long cached API answers are reused (days).
 CACHE_DAYS = {"listings": 0.5, "comps": 14, "floor_areas": 60}

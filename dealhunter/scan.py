@@ -38,11 +38,15 @@ def run_scan(client, store: Store, areas: list[dict], lists: list[str], bb: dict
     seen, errors, stopped = 0, [], ""
     logs = store.all_logs()
     found: list[tuple[str, dict]] = []
+    searched: list[str] = []
     try:
         for ai, area in enumerate(areas):
             if progress:
                 progress(ai / max(1, len(areas)) * 0.2, f"Fetching listings near {area['name']}")
             try:
+                if hasattr(client, "search_points"):
+                    pts = client.search_points(area["postcode"], int(area.get("radius") or 5))
+                    searched.append(f"{area['name'] or area['postcode']}: {', '.join(pts)}")
                 for l in client.sourced_properties(area["postcode"], int(area.get("radius") or 5), lists,
                                                    bb["min_price"], bb["max_price"], bb["exclude_flats"]):
                     if l.get("price"):
@@ -80,6 +84,7 @@ def run_scan(client, store: Store, areas: list[dict], lists: list[str], bb: dict
     mode = "demo" if client.__class__.__name__ == "DemoData" else "live"
     store.log_scan(mode, client.credits_used, seen, "; ".join(([stopped] if stopped else []) + errors[:5]))
     return {"listings": seen, "found": len(found), "credits": client.credits_used, "errors": errors,
+            "searched": searched,
             "stopped": stopped, "seconds": round(time.time() - t0, 1),
             "raw_samples": getattr(client, "raw_samples", {})}
 

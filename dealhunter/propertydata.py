@@ -65,6 +65,40 @@ def geocode_town(name: str) -> str:
     return f"{p['latitude']},{p['longitude']}"
 
 
+PIO = "https://api.postcodes.io"
+MAX_DISTRICTS = 40
+
+
+def _pio(path: str, params: dict | None = None):
+    try:
+        r = requests.get(PIO + path, params=params or {}, timeout=15)
+        return (r.json() or {}).get("result")
+    except (requests.RequestException, ValueError):
+        return None
+
+
+def centre_of(kind: str, value: str):
+    """(lat, lng) for a district, sector, full postcode or town."""
+    if kind == "town":
+        lat, lng = geocode_town(value).split(",")
+        return float(lat), float(lng)
+    v = value.upper()
+    if POSTCODE_FULL.match(v):
+        res = _pio(f"/postcodes/{v.replace(' ', '')}")
+        if res:
+            return res["latitude"], res["longitude"]
+    res = _pio(f"/outcodes/{v.split()[0]}")
+    if res and res.get("latitude"):
+        return res["latitude"], res["longitude"]
+    return None
+
+
+def districts_near(lat: float, lng: float, miles: float) -> list[str]:
+    """Postcode districts whose centre is within `miles` of the point, nearest first."""
+    res = _pio("/outcodes", {"lat": lat, "lon": lng, "radius": int(min(25000, miles * 1609)), "limit": 100}) or []
+    return [r["outcode"] for r in res if r.get("outcode")][:MAX_DISTRICTS]
+
+
 class BudgetExceeded(Exception):
     pass
 
@@ -124,11 +158,16 @@ class PropertyData:
                 raise BudgetExceeded(f"Scan stopped at the credit budget ({self.budget}).")
             self.credits_used += cost
         try:
-            return self._fetch(endpoint, params, cache_key)
+            body = self._fetch(endpoint, params, cache_key)
         except Exception:
             with self._lock:
                 self.credits_used -= cost
             raise
+        actual = _num(body.get("api_calls_cost")) if isinstance(body, dict) else None
+        if actual is not None and actual != cost:
+            with self._lock:
+                self.credits_used += int(actual) - cost  # charge what PropertyData actually charged
+        return body
 
     def _fetch(self, endpoint: str, params: dict, cache_key: str):
         for attempt in range(3):
@@ -159,23 +198,43 @@ class PropertyData:
             return {"status": "error", "message": f"HTTP {r.status_code}, not JSON"}
 
     # ------------------------------------------------------------- listings
-    def sourced_properties(self, area: str, radius: int, lists: list[str], min_price: int,
-                           max_price: int, exclude_flats: bool, results: int = 100) -> list[dict]:
+    def search_points(self, area: str, radius: float) -> list[str]:
+        """PropertyData only returns listings within about a mile of the search point, whatever the
+        radius. So an area is swept district by district: every postcode district within the radius."""
         kind, value = classify_area(area)
-        if kind == "town":
-            loc = self.store.cache_get("geocode?" + value.lower(), 365)
-            if loc is None:
-                loc = geocode_town(value)
-                self.store.cache_put("geocode?" + value.lower(), loc)
-            where = {"location": loc}
-        else:
-            where = {"postcode": value}
-        params = {"list": ",".join(lists[:5]), **where, "radius": radius,
-                  "min_price": min_price, "max_price": max_price, "results": results, "exclude_sstc": 1}
-        if exclude_flats:
-            params["standardised_type"] = "!flat"
-        body = self._get("sourced-properties", params, math.ceil(results / 10), CACHE_DAYS["listings"])
-        return [normalise_listing(p) for p in body.get("properties", [])]
+        key = f"districts?{kind}:{value.lower()}:{radius}"
+        cached = self.store.cache_get(key, 90)
+        if cached:
+            return cached
+        points = [value] if kind == "postcode" else []
+        try:
+            c = centre_of(kind, value)
+            if c:
+                for d in districts_near(c[0], c[1], radius):
+                    if d not in points and (kind != "postcode" or d != value.split()[0]):
+                        points.append(d)
+        except ValueError:
+            if not points:
+                raise
+        if not points:
+            raise ValueError(f"Couldn't find postcode districts for '{area}'. Try a district like LS9.")
+        self.store.cache_put(key, points)
+        return points
+
+    def sourced_properties(self, area: str, radius: int, lists: list[str], min_price: int,
+                           max_price: int, exclude_flats: bool, results: int = 50) -> list[dict]:
+        seen, out = set(), []
+        for point in self.search_points(area, radius):
+            params = {"list": ",".join(lists[:5]), "postcode": point, "radius": 1,
+                      "min_price": min_price, "max_price": max_price, "results": results, "exclude_sstc": 1}
+            if exclude_flats:
+                params["standardised_type"] = "!flat"
+            body = self._get("sourced-properties", params, math.ceil(results / 10), CACHE_DAYS["listings"])
+            for p in body.get("properties", []):
+                l = normalise_listing(p)
+                if l["id"] not in seen:
+                    seen.add(l["id"]); out.append(l)
+        return out
 
     # ---------------------------------------------------------------- comps
     def sold_psf(self, postcode: str, type_std: str) -> dict:
