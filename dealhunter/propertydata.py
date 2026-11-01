@@ -29,6 +29,10 @@ POSTCODE_AREA = re.compile(r"^[A-Z]{1,2}$")
 
 # Postcode area -> its town-centre district, so "LS" searches around central Leeds.
 AREA_CENTRE = {"EC": "EC1V", "WC": "WC1X", "W": "W2", "SW": "SW2"}  # London areas without a plain "1" district
+UK_AREAS = set("""AB AL B BA BB BD BH BL BN BR BS BT CA CB CF CH CM CO CR CT CV CW DA DD DE DG DH DL DN DT DY
+E EC EH EN EX FK FY G GL GU HA HD HG HP HR HS HU HX IG IP IV KA KT KW KY L LA LD LE LL LN LS LU M ME MK ML
+N NE NG NN NP NR NW OL OX PA PE PH PL PO PR RG RH RM S SA SE SG SK SL SM SN SO SP SR SS ST SW SY TA TD TF
+TN TQ TR TS TW UB W WA WC WD WF WN WR WS WV YO ZE""".split())
 
 
 def classify_area(text: str) -> tuple[str, str]:
@@ -39,7 +43,7 @@ def classify_area(text: str) -> tuple[str, str]:
         raise ValueError("Enter a postcode (LS9, LS9 0 or LS9 7AB) or a town name.")
     if POSTCODE_FULL.match(t) or POSTCODE_SECTOR.match(t) or POSTCODE_DISTRICT.match(t):
         return "postcode", t
-    if POSTCODE_AREA.match(t):
+    if POSTCODE_AREA.match(t) and t in UK_AREAS:
         return "postcode", AREA_CENTRE.get(t, t + "1")  # e.g. LS -> LS1 (central Leeds) + radius
     if len(t) < 3:
         raise ValueError(f"'{text}' isn't a postcode or town PropertyData can search.")
