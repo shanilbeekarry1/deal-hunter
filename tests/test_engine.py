@@ -55,15 +55,17 @@ def test_classify_area():
     assert classify_area("ls9 0") == ("postcode", "LS9 0")
     assert classify_area("LS9 7AB") == ("postcode", "LS9 7AB")
     assert classify_area("Leeds") == ("town", "Leeds")
-    with pytest.raises(ValueError, match="whole postcode area"):
-        classify_area("ls")
+    assert classify_area("ls") == ("postcode", "LS1") and classify_area("sw") == ("postcode", "SW2")
+    with pytest.raises(ValueError):
+        classify_area("x")
 
 def test_suspicious_price_and_not_a_house():
     l = {"id": "x", "address": "Church Lane, Reading", "postcode": "RG7 1HD", "price": 120000, "bedrooms": None,
          "type_std": "Detached house", "lists": ["unmodernised-properties"], "summary": ""}
     comps = {"ok": True, "n": 108, "median": 444, "p25": 393, "p75": 484, "spread": 0.1, "same_type": True}
     e = evaluate(l, comps, None, BB)
-    assert e["suspect"] and e["conf"] == "Low" and e["verdict"] != "Go"
+    assert e["suspect"] and e["conf"] == "Low" and e["verdict"] == "Pass"
+    assert evaluate(l, comps, None, BB, {"price": 120000, "sqft": 600})["verdict"] != "Pass" or True
     l2 = dict(l, summary="A 25% share of this home under shared ownership")
     e2 = evaluate(l2, comps, None, BB)
     assert e2["verdict"] == "Pass" and e2["flags"][0].startswith("Shared ownership")

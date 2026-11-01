@@ -200,6 +200,8 @@ def evaluate(listing: dict, comps: dict, sqft_found, bb: dict, overrides: dict |
         flags = nah + flags
         v = "Pass"  # the valuation doesn't apply
     suspect = base["bmv"] > 0.45 or bool(nah)
+    if base["bmv"] > 0.45 and not any(o.get(k) for k in ("price", "sqft", "asis_psf", "renov_psf")):
+        v = "Pass"  # implausible until someone checks the listing and overrides the numbers
     if outside_england(listing.get("postcode", "")):
         flags.append("Outside England: stamp duty here uses England rates, so the tax line is wrong")
 
