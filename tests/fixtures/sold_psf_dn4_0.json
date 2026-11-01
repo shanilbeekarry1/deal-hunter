@@ -1,0 +1,440 @@
+{
+ "status": "success",
+ "postcode": "DN4 0",
+ "postcode_type": "sector",
+ "max_age": 18,
+ "data": {
+  "points_analysed": 120,
+  "average": 130,
+  "70pc_range": [
+   90,
+   187
+  ],
+  "80pc_range": [
+   85,
+   205
+  ],
+  "raw_data": [
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 73
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 70
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 92
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 73
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 72
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 85
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 82
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 77
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 90
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 80
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 74
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 73
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 95
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 94
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 101
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 80
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 95
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 98
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 73
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 85
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 103
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 110
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 102
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 130
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 119
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 101
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 100
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 118
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 100
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 110
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 83
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 106
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 88
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 101
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 104
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 111
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 115
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 115
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 97
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 127
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 141
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 142
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 153
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 104
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 102
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 120
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 126
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 112
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 87
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 131
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 134
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 100
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 125
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 130
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 133
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 101
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 110
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 130
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 135
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 153
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 147
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 169
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 103
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 122
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 160
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 142
+   },
+   {
+    "type": "terraced_house",
+    "price_per_sqf": 97
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 85
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 89
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 134
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 160
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 116
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 143
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 151
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 129
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 130
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 145
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 129
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 175
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 165
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 148
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 144
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 193
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 156
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 155
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 176
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 186
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 171
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 183
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 171
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 155
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 202
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 160
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 186
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 164
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 187
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 130
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 183
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 187
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 208
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 205
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 223
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 200
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 213
+   },
+   {
+    "type": "semi-detached_house",
+    "price_per_sqf": 176
+   }
+  ]
+ }
+}

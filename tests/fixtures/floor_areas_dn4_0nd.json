@@ -1,0 +1,26 @@
+{
+ "status": "success",
+ "postcode": "DN4 0ND",
+ "known_floor_areas": [
+  {
+   "inspection_date": "2025-07-15T23:00:00.000000Z",
+   "address": "45 Alexandra Road",
+   "square_feet": 893
+  },
+  {
+   "inspection_date": "2024-05-28T23:00:00.000000Z",
+   "address": "7 Alexandra Road",
+   "square_feet": 1055
+  },
+  {
+   "inspection_date": "2013-07-16T23:00:00.000000Z",
+   "address": "7, Alexandra Road",
+   "square_feet": 1076
+  },
+  {
+   "inspection_date": "2009-03-11T00:00:00.000000Z",
+   "address": "37, Alexandra Road",
+   "square_feet": 0
+  }
+ ]
+}

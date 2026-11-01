@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Deal Hunter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<!-- Sign in -->
+<section id="login" class="login" hidden>
+  <form id="login-form" class="login-card">
+    <h1>Deal Hunter</h1>
+    <p class="muted">Find, value and decide on buy-refurbish-sell deals.</p>
+    <label for="login-name">Your name</label>
+    <input id="login-name" autocomplete="name" required maxlength="40" placeholder="Shanil">
+    <div id="pw-wrap">
+      <label for="login-pw">Password</label>
+      <input id="login-pw" type="password" autocomplete="current-password">
+    </div>
+    <button class="btn primary" type="submit">Sign in</button>
+    <p id="login-err" class="err" role="alert"></p>
+  </form>
+</section>
+
+<!-- App -->
+<div id="app" hidden>
+  <header class="topbar">
+    <div class="brand">
+      <h1>Deal Hunter</h1>
+      <span id="mode-pill" class="pill"></span>
+    </div>
+    <div class="top-actions">
+      <span id="who" class="muted"></span>
+      <button id="btn-settings" class="btn ghost" type="button" aria-expanded="false" aria-controls="settings">Buy box &amp; areas</button>
+      <button id="btn-scan" class="btn primary" type="button">Run scan</button>
+    </div>
+  </header>
+  <div id="banner" class="banner" role="status" hidden></div>
+
+  <div class="layout">
+    <!-- Settings drawer -->
+    <aside id="settings" class="settings" hidden>
+      <div class="settings-head">
+        <h2>Shared settings</h2>
+        <span id="settings-saved" class="muted small"></span>
+      </div>
+      <p class="muted small">Both of you see the same settings. Changes save automatically and re-rank the shortlist.</p>
+
+      <h3>Areas</h3>
+      <div id="areas" class="areas"></div>
+      <button id="add-area" class="btn ghost small" type="button">+ Add area</button>
+
+      <h3>Sourcing lists <span class="muted small">(up to 5)</span></h3>
+      <div id="lists" class="lists"></div>
+
+      <h3>Buy box</h3>
+      <div class="grid2">
+        <label>Min price £<input id="bb-min_price" type="number" step="5000" min="0"></label>
+        <label>Max price £<input id="bb-max_price" type="number" step="5000" min="0"></label>
+      </div>
+      <label class="check"><input id="bb-exclude_flats" type="checkbox"> Exclude flats</label>
+      <div id="sliders"></div>
+
+      <h3>Refurb rates £/sq ft</h3>
+      <div class="grid3">
+        <label>Light<input id="rate-light" type="number" min="0" step="1"></label>
+        <label>Medium<input id="rate-medium" type="number" min="0" step="1"></label>
+        <label>Heavy<input id="rate-heavy" type="number" min="0" step="1"></label>
+      </div>
+
+      <h3>Scan</h3>
+      <label>Credit budget per scan<input id="budget" type="number" min="10" max="2000" step="10"></label>
+      <p class="muted small">The scan stops before spending more than this. Comparables and floor areas are cached, so repeat scans cost far less.</p>
+      <button id="btn-check-key" class="btn ghost small" type="button">Check API key</button>
+      <pre id="key-result" class="small" hidden></pre>
+    </aside>
+
+    <main class="main">
+      <section class="stats" id="stats" aria-label="Summary"></section>
+
+      <nav class="tabs" role="tablist">
+        <button role="tab" data-tab="shortlist" aria-selected="true">Shortlist</button>
+        <button role="tab" data-tab="pipeline" aria-selected="false">Pipeline</button>
+        <button role="tab" data-tab="history" aria-selected="false">Scan history</button>
+      </nav>
+
+      <section id="tab-shortlist" class="tab">
+        <div class="filters">
+          <div class="chipset" role="group" aria-label="Verdict">
+            <button class="fchip" data-v="Go" aria-pressed="true">Go</button>
+            <button class="fchip" data-v="Review" aria-pressed="true">Review</button>
+            <button class="fchip" data-v="Pass" aria-pressed="false">Pass</button>
+          </div>
+          <select id="area-filter" aria-label="Area"><option value="">All areas</option></select>
+          <label class="check small"><input id="hide-rejected" type="checkbox" checked> Hide rejected</label>
+        </div>
+        <div class="split">
+          <div id="list" class="list"></div>
+          <aside id="sheet" class="sheet" aria-live="polite"></aside>
+        </div>
+      </section>
+
+      <section id="tab-pipeline" class="tab" hidden>
+        <div class="split">
+          <div>
+            <div id="pipe-list" class="list"></div>
+            <div id="reasons"></div>
+          </div>
+          <aside id="pipe-sheet" class="sheet"></aside>
+        </div>
+      </section>
+
+      <section id="tab-history" class="tab" hidden>
+        <div id="history"></div>
+        <div id="raw"></div>
+        <button id="btn-clear" class="btn ghost small" type="button">Clear stored listings</button>
+        <p class="muted small">Clearing keeps the deal log, settings and cached API answers.</p>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" hidden></div>
+<script src="/app.js"></script>
+</body>
+</html>

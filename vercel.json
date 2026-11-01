@@ -1,0 +1,6 @@
+{
+  "regions": ["lhr1"],
+  "functions": {
+    "app.py": { "maxDuration": 300 }
+  }
+}

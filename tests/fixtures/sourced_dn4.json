@@ -1,0 +1,138 @@
+{
+ "status": "success",
+ "properties": [
+  {
+   "id": "R169212860",
+   "address": "Alexandra Road, Balby, Doncaster",
+   "precise_address": "7, ALEXANDRA ROAD, BALBY, DONCASTER, DN4 0ND",
+   "postcode": "DN4 0ND",
+   "type": "Terraced",
+   "type_standardised": "Terraced house",
+   "bedrooms": 2,
+   "price": 70000,
+   "sqf": null,
+   "days_on_market": 356,
+   "days_since_price_change": 69,
+   "sstc": 0,
+   "lat": "53.50925500",
+   "lng": "-1.14805100",
+   "distance_to": "0.87",
+   "price_history": [
+    {
+     "date": "2025-11-13",
+     "price": 90000
+    },
+    {
+     "date": "2026-03-05",
+     "price": 80000
+    },
+    {
+     "date": "2026-08-24",
+     "price": 70000
+    }
+   ],
+   "summary": "This terraced house is being sold with the benefit of tenants in situ. The asking price has been reduced twice by a total of 22% from the first listing price.",
+   "reduced_by": "22.222222222222",
+   "lists": [
+    {
+     "id": "reduced-properties",
+     "name": "Price reduced properties"
+    }
+   ],
+   "url": "https://propertydata.co.uk/outbound/rightmove/169212860"
+  },
+  {
+   "id": "R94350702",
+   "address": "Albany Road, Balby",
+   "precise_address": null,
+   "postcode": "DN4 0QW",
+   "type": "Terraced",
+   "type_standardised": "Terraced house",
+   "bedrooms": 3,
+   "price": 69000,
+   "sqf": null,
+   "days_on_market": 18,
+   "days_since_price_change": 17,
+   "sstc": 0,
+   "price_history": [
+    {
+     "date": "2026-10-15",
+     "price": 69000
+    }
+   ],
+   "summary": "This three-bedroom mid-terraced house in Balby, Doncaster, is offered chain free through the Modern Method of Auction. It includes two reception rooms, a kitchen, a loft room, a cellar and a rear garden, close to transport links, amenities and schools.\n\nThe property requires full refurbishment and modernisation throughout, so it suits investors, developers or buyers wanting a renovation project.",
+   "lists": [
+    {
+     "id": "unmodernised-properties",
+     "name": "Unmodernised properties"
+    }
+   ],
+   "url": "https://propertydata.co.uk/outbound/rightmove/94350702"
+  },
+  {
+   "id": "R89313834",
+   "address": "Salisbury Road, Doncaster, DN4",
+   "precise_address": "30, SALISBURY ROAD, HEXTHORPE, DONCASTER, DN4 0HA",
+   "postcode": "DN4 0HA",
+   "type": "Terraced",
+   "type_standardised": "Terraced house",
+   "bedrooms": 3,
+   "price": 100000,
+   "sqf": 1245,
+   "days_on_market": 151,
+   "days_since_price_change": 15,
+   "sstc": 0,
+   "price_history": [
+    {
+     "date": "2026-06-05",
+     "price": 120000
+    },
+    {
+     "date": "2026-06-15",
+     "price": 110000
+    },
+    {
+     "date": "2026-10-17",
+     "price": 100000
+    }
+   ],
+   "summary": "This traditional three-bedroom terraced house on Salisbury Road, Doncaster, is offered for sale with tenants in situ or with vacant possession, making it suited to investors or first-time buyers.",
+   "reduced_by": "16.666666666667",
+   "lists": [
+    {
+     "id": "reduced-properties",
+     "name": "Price reduced properties"
+    }
+   ],
+   "url": "https://propertydata.co.uk/outbound/rightmove/89313834"
+  },
+  {
+   "id": "Z74498308",
+   "address": "Albany Road, Doncaster DN4",
+   "precise_address": null,
+   "postcode": "DN4 0QN",
+   "type": "terraced",
+   "type_standardised": "Terraced house",
+   "bedrooms": 3,
+   "price": 110000,
+   "sqf": null,
+   "days_on_market": 20,
+   "days_since_price_change": 11,
+   "sstc": 0,
+   "price_history": [
+    {
+     "date": "2026-10-21",
+     "price": 110000
+    }
+   ],
+   "summary": "It is offered with vacant possession and is freehold. The particulars describe it as having great potential for someone willing to undertake some work to create their own interior, or for an investor.",
+   "lists": [
+    {
+     "id": "unmodernised-properties",
+     "name": "Unmodernised properties"
+    }
+   ],
+   "url": "https://propertydata.co.uk/outbound/zoopla/74498308"
+  }
+ ]
+}
