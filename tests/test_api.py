@@ -28,3 +28,12 @@ def test_auth_settings_scan_log(tmp_path, monkeypatch):
     assert len(c.get("/api/scans").json()["scans"]) == 1
     assert c.get("/").status_code == 200 and c.get("/app.js").status_code == 200
     assert c.get("/../app.py").status_code == 404
+
+def test_live_mode_hides_demo(tmp_path, monkeypatch):
+    c = make(tmp_path, monkeypatch)
+    c.post("/api/login", json={"name": "S", "password": "secret"}); c.post("/api/scan")
+    assert c.get("/api/deals").json()["deals"]
+    monkeypatch.setenv("PROPERTYDATA_API_KEY", "x")
+    import app; importlib.reload(app); c2 = TestClient(app.app)
+    c2.post("/api/login", json={"name": "S", "password": "secret"})
+    assert c2.get("/api/deals").json()["deals"] == [] and c2.get("/api/me").json()["live"] is True

@@ -127,6 +127,10 @@ class Store:
         return [{"id": r.id, "first_seen": r.first_seen, "last_seen": r.last_seen, "area": r.area,
                  "data": json.loads(r.data), "evaluation": json.loads(r.evaluation or "{}")} for r in rows]
 
+    def clear_demo_listings(self) -> None:
+        with self.engine.begin() as c:
+            c.execute(listings.delete().where(listings.c.id.like("DEMO-%")))
+
     def clear_listings(self) -> None:
         with self.engine.begin() as c:
             c.execute(listings.delete())

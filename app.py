@@ -149,7 +149,10 @@ def _row(r: dict) -> dict:
 @app.get("/api/deals")
 def deals(who: str = Depends(user)):
     s = current_settings()
-    return {"deals": [_row(r) for r in re_evaluate_all(store(), s["bb"], s["rates"])], "settings": s}
+    rows = re_evaluate_all(store(), s["bb"], s["rates"])
+    if API_KEY:  # live mode: never show invented demo listings
+        rows = [r for r in rows if not str(r["id"]).startswith("DEMO-")]
+    return {"deals": [_row(r) for r in rows], "settings": s}
 
 
 class Log(BaseModel):
@@ -174,6 +177,8 @@ def scan(who: str = Depends(user)):
         raise HTTPException(400, "Add at least one area.")
     if not s["lists"]:
         raise HTTPException(400, "Pick at least one sourcing list.")
+    if API_KEY:
+        store().clear_demo_listings()
     client = PropertyData(API_KEY, store(), int(s["budget"])) if API_KEY else DemoData()
     res = run_scan(client, store(), s["areas"], s["lists"], s["bb"], s["rates"])
     if res["raw_samples"]:
