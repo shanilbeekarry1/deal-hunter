@@ -58,6 +58,12 @@ def not_a_house(listing: dict) -> list[str]:
     return [why for pat, why in NOT_A_HOUSE if re.search(pat, text)]
 
 
+def is_auction(listing: dict) -> bool:
+    text = (listing.get("summary") or "").lower()
+    return ("auction" in text or "starting bid" in text or "guide price" in text
+            or "auction-properties" in listing.get("lists", []))
+
+
 def listing_flags(listing: dict) -> list[str]:
     """Watch-outs read from the listing itself."""
     text = (listing.get("summary") or "").lower()
@@ -142,6 +148,8 @@ def confidence(comps: dict, sqft_source: str, listing: dict, bmv: float) -> tupl
         score -= 20; why.append("Floor area estimated from bedrooms. Check the floor plan")
     if listing.get("years_remaining") and listing["years_remaining"] < 85:
         score -= 25; why.append(f"Short lease ({int(listing['years_remaining'])} years): hard to mortgage, comps don't reflect it")
+    if is_auction(listing):
+        score -= 10; why.append("Auction or starting-bid price: the final price is usually higher. Model your max bid")
     if not listing.get("bedrooms"):
         score -= 10; why.append("Bedrooms not stated")
     if bmv > 0.45:
@@ -195,6 +203,8 @@ def evaluate(listing: dict, comps: dict, sqft_found, bb: dict, overrides: dict |
     flags += listing_flags(listing)
     if v == "Go" and any(f.startswith("Tenants in situ") for f in flags):
         v = "Review"  # can't flip it until the tenants have left
+    if v == "Go" and is_auction(listing) and not (overrides or {}).get("price"):
+        v = "Review"  # asking is a guide / starting bid; enter your expected price to model it
     nah = not_a_house(listing)
     if nah:
         flags = nah + flags

@@ -146,6 +146,7 @@ class PropertyData:
         self.credits_used = 0
         self.raw_samples: dict[str, object] = {}
         self._lock = threading.Lock()
+        self._comps_memo: dict[str, threading.Lock] = {}
 
     # ------------------------------------------------------------------ core
     def _get(self, endpoint: str, params: dict, cost: int, cache_days: float):
@@ -238,12 +239,27 @@ class PropertyData:
 
     # ---------------------------------------------------------------- comps
     def sold_psf(self, postcode: str, type_std: str) -> dict:
-        params = {"postcode": postcode_sector(postcode), "max_age": 24, "points": 100, "class": "old_stock"}
-        t = TYPE_MAP.get((type_std or "").lower())
-        if t:
-            params["type"] = t
-        body = self._get("sold-prices-per-sqf", params, 1, CACHE_DAYS["comps"])
-        return normalise_comps(body.get("data", body), type_std)
+        """Sold £/sq ft near the property. One lookup per postcode sector (all types), filtered
+        to the same property type locally. Falls back to the district, then a longer period,
+        when PropertyData says there isn't enough data (X08)."""
+        sector = postcode_sector(postcode)
+        with self._lock:
+            memo = self._comps_memo.setdefault(sector, threading.Lock())
+        with memo:  # parallel threads asking for the same sector wait for one lookup
+            attempts = [{"postcode": sector, "max_age": 24, "points": 40, "class": "old_stock"},
+                        {"postcode": sector.split()[0], "max_age": 24, "points": 40, "class": "old_stock"},
+                        {"postcode": sector, "max_age": 60, "points": 20}]
+            for params in attempts:
+                try:
+                    body = self._get("sold-prices-per-sqf", params, 1, CACHE_DAYS["comps"])
+                except APIError as e:
+                    if "X08" in str(e) or "nsufficient" in str(e):
+                        continue
+                    raise
+                c = normalise_comps(body.get("data", body), type_std)
+                c["area"] = params["postcode"]
+                return c
+        return {"ok": False, "n": 0}
 
     # ---------------------------------------------------------- floor areas
     def floor_area(self, postcode: str, address: str):
@@ -288,12 +304,22 @@ def normalise_listing(p: dict) -> dict:
         "summary": p.get("summary") or "",
         "years_remaining": _num(p.get("years_remaining")),
         "highest_offer": _num(p.get("highest_offer")),
-        "url": _first(p, "url", "listing_url", "link", default=""),
+        "url": portal_url(pid) or _first(p, "url", "listing_url", "link", default=""),
         "portal": _first(p, "portal", "source", default=portal),
         "distance": _num(_first(p, "distance_to", "distance")),
         "lat": _num(p.get("lat")), "lng": _num(p.get("lng")),
         "lists": list_ids,
     }
+
+
+def portal_url(pid: str) -> str:
+    """Direct link to the listing on its portal, from PropertyData's id (R/Z/O + number)."""
+    m = re.match(r"^([RZO])(\d+)$", pid or "")
+    if not m:
+        return ""
+    return {"R": f"https://www.rightmove.co.uk/properties/{m.group(2)}",
+            "Z": f"https://www.zoopla.co.uk/for-sale/details/{m.group(2)}/",
+            "O": f"https://www.onthemarket.com/details/{m.group(2)}/"}[m.group(1)]
 
 
 def _percentile(xs: list[float], q: float) -> float:

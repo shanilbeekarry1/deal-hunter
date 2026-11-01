@@ -94,3 +94,23 @@ def test_sweep_and_actual_credits(tmp_path, monkeypatch):
     assert sorted(l["id"] for l in out) == ["LS15", "LS8", "LS9", "R1"]   # deduped across districts
     assert c.credits_used == 3                                              # actual cost, not reserved 5 each
     assert all(p["radius"] == 1 for u, p in calls if u.endswith("sourced-properties"))
+
+def test_comps_fallback_on_x08_and_portal_url(tmp_path, monkeypatch):
+    from dealhunter.db import Store
+    from dealhunter import propertydata as pd
+    seen = []
+    class R:
+        def __init__(s, body): s.body, s.status_code, s.headers = body, 200, {}
+        def json(s): return s.body
+    def fake_get(url, params=None, timeout=None):
+        seen.append(params["postcode"])
+        if params["postcode"] == "LS4 2":
+            return R({"status": "error", "code": "X08", "message": "Insufficient data found"})
+        return R({"status": "success", "data": {"points_analysed": 40, "average": 240,
+                  "raw_data": [{"type": "terraced_house", "price_per_sqf": v} for v in range(200, 300, 4)]}})
+    monkeypatch.setattr(pd.requests, "get", fake_get)
+    c = pd.PropertyData("k", Store(f"sqlite:///{tmp_path}/c.db"), 50)
+    r = c.sold_psf("LS4 2JG", "Terraced house")
+    assert r["ok"] and r["area"] == "LS4" and seen == ["LS4 2", "LS4"] and c.credits_used == 1
+    assert pd.portal_url("Z74071472") == "https://www.zoopla.co.uk/for-sale/details/74071472/"
+    assert pd.portal_url("R93864699").startswith("https://www.rightmove.co.uk/properties/93864699")

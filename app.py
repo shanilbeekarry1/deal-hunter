@@ -19,7 +19,7 @@ from dealhunter.config import (ALL_LISTS, DEFAULT_AREAS, DEFAULT_BUY_BOX, DEFAUL
                                DEFAULT_LISTS, REFURB_RATES)
 from dealhunter.db import Store
 from dealhunter.engine import refurb_band
-from dealhunter.propertydata import DemoData, PropertyData
+from dealhunter.propertydata import DemoData, PropertyData, portal_url
 from dealhunter.scan import re_evaluate_all, run_scan
 
 app = FastAPI(title="Deal Hunter")
@@ -171,6 +171,7 @@ def put_settings(body: Settings, who: str = Depends(user)):
 # ------------------------------------------------------------------ deals
 def _row(r: dict) -> dict:
     d = {k: v for k, v in r["data"].items() if not k.startswith("_demo")}
+    d["url"] = portal_url(str(r["id"])) or d.get("url", "")
     return {"id": r["id"], "area": r["area"], "first_seen": r["first_seen"], "last_seen": r["last_seen"],
             "data": d, "evaluation": r["evaluation"], "log": r["log"], "default_band": refurb_band(d)}
 

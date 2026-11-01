@@ -330,7 +330,7 @@ function renderSheet(d, el) {
       <div class="conf"><h3 style="margin:0">Valuation confidence</h3><div class="meter"><i style="width:${e.conf_score}%"></i></div>
         <span class="num small">${esc(e.conf)} · ${e.conf_score}</span></div>
       ${e.suspect ? `<p class="err small" style="margin:0"><b>Price looks wrong for a whole house here.</b> Read the listing before trusting these numbers.</p>` : ""}
-      ${c.ok ? `<p class="muted small" style="margin:0">${c.n} sold ${c.same_type ? "same-type " : ""}comparables in the ${esc((l.postcode || "").slice(0, -2).trim())} sector.
+      ${c.ok ? `<p class="muted small" style="margin:0">${c.n} sold ${c.same_type ? "same-type " : ""}comparables in ${esc(c.area || (l.postcode || "").slice(0, -2).trim())}.
         As-is uses the lower quartile <span class="num">£${Math.round(e.asis_psf)}</span>/sq ft, after-refurb the upper quartile
         <span class="num">£${Math.round(e.renov_psf)}</span>/sq ft (median £${Math.round(c.median)}).</p>` : ""}
       ${e.conf_why.length ? `<ul>${e.conf_why.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
